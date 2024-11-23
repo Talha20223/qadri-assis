@@ -11,7 +11,7 @@ const apiKey = "AIzaSyCI81XPE5m1giLHNrwMaYYe9-Q7qw9aefY";
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 const app = express();
-const port = 5000;
+const port = 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));

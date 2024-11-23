@@ -3,190 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Qadri Homeopathic Assistant</title>
+  <title>qadri homeopathic assistant</title>
   <style>
-    /* General styles */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
 
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-    }
+/* General Reset and Font */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
 
-    .chat-container {
-      width: 100%;
-      max-width: 600px;
-      height: 90%;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #ddd;
-      border-radius: 15px;
-      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
-      background-color: #ffffff;
-      overflow: hidden;
-    }
+#tts-toggle{
+  border-radius:30px;
 
-    .chat-box {
-      flex-grow: 1;
-      padding: 20px;
-      overflow-y: auto;
-      scroll-behavior: smooth;
-    }
+}
 
-    /* Styling for message bubbles */
-    .message {
-      max-width: 75%;
-      margin: 8px 0;
-      padding: 10px 15px;
-      border-radius: 20px;
-      font-size: 16px;
-      line-height: 1.4;
-      box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-      word-wrap: break-word;
-    }
+body {
+  background: linear-gradient(135deg, #ece9e6, #ffffff);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
 
-    .user {
-      align-self: flex-end;
-      background-color: #4f8bff;
-      color: #fff;
-      border-bottom-right-radius: 5px;
-    }
+/* Title Bar */
+.title-bar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.6); /* Acrylic Effect */
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
-    .assistant {
-      align-self: flex-start;
-      background-color: #f1f1f1;
-      color: #333;
-      border-bottom-left-radius: 5px;
-    }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+}
 
-    .bold-centered {
-      font-weight: bold;
-      text-align: center;
-      display: block;
-      margin: 8px 0;
-    }
+.title-bar h1 {
+  font-size: 1.5rem;
+  color: #333;
+  text-align:center;
+}
 
-    a {
-      color: #4f8bff;
-      text-decoration: underline;
-      word-break: break-all;
-    }
+/* TTS Toggle */
+.tts-toggle {
+  font-size: 0.9rem;
+  border-radius:20px;
+}
 
-    /* Floating input area */
-    .input-container {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      border-top: 1px solid #ddd;
-      background-color: #ffffff;
-    }
+/* Chat Container */
+#chat-container {
+  margin-top: 70px; /* Space for title bar */
+  width: 100%;
+  height: calc(100vh - 150px); /* Full screen minus title and input areas */
+  background: rgba(255, 255, 255, 0.6); /* Acrylic Effect */
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
 
-    #user-input {
-      flex-grow: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 20px;
-      font-size: 16px;
-      background-color: #f0f2f5;
-      margin-right: 10px;
-      outline: none;
-      box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.1);
-    }
+#chat-container div {
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  max-width: 75%;
+  word-wrap: break-word;
+}
 
-    #send-button {
-      padding: 10px 15px;
-      font-size: 16px;
-      color: #fff;
-      background-color: #4f8bff;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-      transition: background-color 0.3s ease;
-    }
+#chat-container .user {
+  align-self: flex-end;
+  background: #007bff;
+  color: white;
+  animation: fadeIn 0.3s ease-out;
+}
 
-    #send-button:hover {
-      background-color: #3b72e3;
-    }
+#chat-container .bot {
+  align-self: flex-start;
+  background: #f1f1f1;
+  color: #333;
+  animation: fadeIn 0.3s ease-out;
+}
 
-    #send-button:active {
-      transform: scale(0.95);
-    }
-  </style>
+/* Floating Input Styles */
+.input-container {
+  display: flex;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.8); /* Acrylic Effect */
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 100;
+}
+
+#message-input {
+  flex-grow: 1;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 50px;
+  outline: none;
+  background-color: transparent;
+  color: #333;
+  font-size: 1rem;
+}
+
+#message-input::placeholder {
+  color: #999;
+}
+
+/* Image Send Button */
+#send-button, #mic-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+#send-button img, #mic-button img {
+  width: 40px;
+  height: 40px;
+}
+
+/* Smooth animation for new messages */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  #chat-container {
+    height: calc(100vh - 120px);
+    padding: 15px;
+  }
+
+  .input-container {
+    padding: 8px;
+    max-width: 100%;
+    bottom: 15px;
+  }
+
+  #message-input {
+    padding: 8px 12px;
+  }
+
+  #send-button img, #mic-button img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .title-bar h1 {
+    font-size: 1.2rem;
+  }
+}
+
+#qadri{
+  height:80px;
+  margin-right:40px;
+}
+#homeo{
+  margin
+}
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: bold;
+}
+
+</style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-box" id="chat-box"></div>
+  <!-- Floating Title Bar -->
+  <span class="title-bar">
+<img id="qadri" src="https://media.discordapp.net/attachments/1283110895228289155/1307293074887806976/apple-touch-icon.png?ex=6739c70d&is=6738758d&hm=4e24e459b664d6933142555aa9e75ac0405c66cb5b2732274e48e49261037d9e&">
+    <h1 id="homeo">
 
-    <!-- Input Area -->
-    <div class="input-container">
-      <input type="text" id="user-input" placeholder="Type your message here...">
-      <button id="send-button" onclick="sendMessage()">➤</button>
+      Qadri homeopathic Assistant
+      </h1>
+    <div class="tts-toggle">
+      <label for="tts-toggle">TTS:</label>
+      <input type="checkbox" id="tts-toggle" checked>
     </div>
+  </span>
+
+  <!-- Full-Screen Chat Area -->
+  <div id="chat-container"></div>
+
+  <!-- Floating Input Area -->
+  <div class="input-container">
+    <input type="text" id="message-input" placeholder="Enter your message">
+    <!-- Image Send Button -->
+    <button id="send-button">
+      <svg width="30px" height="30px" viewBox="0 0 25.00 25.00" fill="none" xmlns="http://www.w3.org/2000/svg" transform="matrix(1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M2.33045 8.38999C0.250452 11.82 9.42048 14.9 9.42048 14.9C9.42048 14.9 12.5005 24.07 15.9305 21.99C19.5705 19.77 23.9305 6.13 21.0505 3.27C18.1705 0.409998 4.55045 4.74999 2.33045 8.38999Z" stroke="#000000" stroke-width="2.275" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M15.1999 9.12L9.41992 14.9" stroke="#000000" stroke-width="2.275" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+    <!-- Mic Button for Speech-to-Text -->
+    <button id="mic-button">
+      <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#000000"><path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z"/></svg>
+    </button>
   </div>
 
-  <script>
-    document.getElementById('user-input').focus();
+<script>
+const chatContainer = document.getElementById('chat-container');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const ttsToggle = document.getElementById('tts-toggle'); // TTS toggle checkbox
+const micButton = document.getElementById('mic-button'); // Mic button for STT
 
-    // Function to handle sending message on 'Enter' key press
-    document.getElementById('user-input').addEventListener('keypress', (event) => {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
+let chatHistory = []; // Store the conversation history
+
+sendButton.addEventListener('click', async () => {
+  const message = messageInput.value;
+  if (!message) return;
+
+  appendMessage("user", message); // Add user message to UI
+  messageInput.value = '';
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, history: chatHistory }), // Send history
     });
 
-    // Function to handle sending message on button click
-    function sendMessage() {
-      const inputField = document.getElementById('user-input');
-      const message = inputField.value.trim();
+    const data = await response.json();
+    if (response.ok) {
+      appendMessage("bot", data.reply);
+      chatHistory.push({ role: "user", text: message }); // Update History
+      chatHistory.push({ role: "model", text: data.reply }); // Update History
 
-      if (message) {
-        addMessage(message, 'user');
-        fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message })
-        })
-        .then(response => response.json())
-        .then(data => addMessage(data.reply, 'assistant'))
-        .catch(err => console.error('Error:', err));
-        
-        inputField.value = '';
-        inputField.focus();
+      // Speak the bot's response if TTS is enabled
+      if (ttsToggle.checked) {
+        speak(data.reply);
       }
+    } else {
+      console.error("Error:", data.error || response.statusText);
+      appendMessage("bot", "An error occurred."); // Display error message to the user
     }
 
-    // Function to add messages to the chat box
-    function addMessage(text, role) {
-      const chatBox = document.getElementById('chat-box');
-      const messageElement = document.createElement('div');
-      messageElement.className = `message ${role}`;
+  } catch (error) {
+    console.error("Fetch error:", error);
+    appendMessage("bot", "A network error occurred.");
+  }
+});
 
-      if (role === 'assistant') {
-        // Format text to handle bold and centered text, and make links clickable
-        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<span class="bold-centered">$1</span>');
-        formattedText = formattedText.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
-        
-        messageElement.innerHTML = formattedText;
-      } else {
-        messageElement.textContent = text;
-      }
+// Speech-to-text (STT) integration using Web Speech API
+micButton.addEventListener('click', () => {
+  const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = 'en-US'; // Set language to English (can be customized)
+  recognition.start();
 
-      chatBox.appendChild(messageElement);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  recognition.onresult = (event) => {
+    const speechResult = event.results[0][0].transcript;
+    messageInput.value = speechResult; // Populate the input with transcribed speech
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Speech recognition error', event.error);
+  };
+});
+
+function speak(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US'; // You can set this to other languages if needed
+  speechSynthesis.speak(utterance);
+}
+
+function appendMessage(sender, text) {
+  const messageDiv = document.createElement('div');
+  messageDiv.classList.add(sender);
+  messageDiv.innerHTML = formatText(text); // Use innerHTML to apply formatting
+  chatContainer.appendChild(messageDiv);
+  chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom
+}
+
+// Function to format text for bold and clickable links
+function formatText(text) {
+  // Convert *text* to <strong>text</strong>
+  text = text.replace(/\*([^\*]+)\*/g, '<strong>$1</strong>');
+
+  // Convert URLs to clickable links
+  text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+  return text;
+}
   </script>
 </body>
 </html>

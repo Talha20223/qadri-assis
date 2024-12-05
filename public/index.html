@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>qadri homeopathic assistant</title>
   <style>
+  
+  ::selection{
+    background-color:#59c76b;
+  }
 
 /* General Reset and Font */
 * {
@@ -195,20 +199,75 @@ a:hover {
 strong {
   font-weight: bold;
 }
+  
+  
+  
+  /* From Uiverse.io by Lmickk2 */ 
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 2em;
+  height: 1.1em;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: inset 1px 2px 5px 1px rgba(0, 0, 0, 0.329);
+  transition: .4s;
+  border-radius: 30px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 0.5em;
+  width: 0.5em;
+  border-radius: 20px;
+  left: 0.3em;
+  bottom: 0.3em;
+  background-color: rgb(255, 255, 255);
+  transition: .4s;
+}
+
+.switch input:checked + .slider {
+  background-color: #59c76b;
+}
+
+.switch input:focus + .slider {
+  box-shadow: inset 3px 2px 4px rgba(22, 22, 22, 0.253);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1em);
+}
 
 </style>
 </head>
 <body>
   <!-- Floating Title Bar -->
   <span class="title-bar">
-<img id="qadri" src="https://media.discordapp.net/attachments/1283110895228289155/1307293074887806976/apple-touch-icon.png?ex=6739c70d&is=6738758d&hm=4e24e459b664d6933142555aa9e75ac0405c66cb5b2732274e48e49261037d9e&">
+<img id="qadri" src="https://i.ibb.co/M6fQ2vH/apple-touch-icon.png">
     <h1 id="homeo">
 
       Qadri homeopathic Assistant
       </h1>
     <div class="tts-toggle">
-      <label for="tts-toggle">TTS:</label>
-      <input type="checkbox" id="tts-toggle" checked>
+      <label class="switch" for="tts-toggle">
+  <input type="checkbox" id="tts-toggle">
+  <span class="slider"></span>
+</label>
     </div>
   </span>
 

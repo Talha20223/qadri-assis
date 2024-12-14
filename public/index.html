@@ -17,6 +17,55 @@
   box-sizing: border-box;
   font-family: Arial, sans-serif;
 }
+  
+  
+  
+  #user-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+  
+  #username{
+    box-shadow:0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius:15px
+  }
+  
+  #email{
+    box-shadow:0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius:15px
+   }
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.modal-content input {
+  margin: 10px 0;
+  padding: 10px;
+  width: 80%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal-content button {
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
 
 #tts-toggle{
   border-radius:30px;
@@ -51,6 +100,11 @@ body {
   font-size: 1.5rem;
   color: #333;
   text-align:center;
+    
+ 
+  
+  
+  
 }
 
 /* TTS Toggle */
@@ -200,6 +254,19 @@ strong {
   font-weight: bold;
 }
   
+  a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: bold;
+}
+  
   
   
   /* From Uiverse.io by Lmickk2 */ 
@@ -252,10 +319,43 @@ strong {
 .switch input:checked + .slider:before {
   transform: translateX(1em);
 }
+  
+  
+  
+  a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: bold;
+}
+
+iframe {
+  border: none;
+}
 
 </style>
 </head>
 <body>
+  
+  
+  <!-- User Details Modal -->
+<div id="user-modal" style="display: none;">
+  <div class="modal-content">
+    <h2>Welcome</h2>
+    <p>please enter your details i promise i dont use this in fact it is not even stored.it is secure plese enter:</p>
+    <input type="text" id="username" placeholder="Enter your name" required>
+    <input type="email" id="email" placeholder="Enter your email" required>
+    <button id="submit-details">Submit</button>
+  </div>
+</div>
+  
+  
   <!-- Floating Title Bar -->
   <span class="title-bar">
 <img id="qadri" src="https://i.ibb.co/M6fQ2vH/apple-touch-icon.png">
@@ -290,7 +390,6 @@ strong {
 const chatContainer = document.getElementById('chat-container');
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
-const ttsToggle = document.getElementById('tts-toggle'); // TTS toggle checkbox
 const micButton = document.getElementById('mic-button'); // Mic button for STT
 
 let chatHistory = []; // Store the conversation history
@@ -299,7 +398,7 @@ sendButton.addEventListener('click', async () => {
   const message = messageInput.value;
   if (!message) return;
 
-  appendMessage("user", message); // Add user message to UI
+  appendMessage("user", message);  // Add user message to UI
   messageInput.value = '';
 
   try {
@@ -311,14 +410,20 @@ sendButton.addEventListener('click', async () => {
 
     const data = await response.json();
     if (response.ok) {
-      appendMessage("bot", data.reply);
-      chatHistory.push({ role: "user", text: message }); // Update History
+      const formattedResponse = formatText(data.reply); // Format the bot's response
+      appendMessage("bot", formattedResponse);
+      handleAutoOpenLink(data.reply); // Handle auto-opening link if present
+      chatHistory.push({ role: "user", text: message });  // Update History
       chatHistory.push({ role: "model", text: data.reply }); // Update History
 
-      // Speak the bot's response if TTS is enabled
-      if (ttsToggle.checked) {
-        speak(data.reply);
-      }
+      // Play the bot's audio response
+      const audio = new Audio(`/${data.audio}`);
+      audio.play();
+
+      audio.onended = async () => {
+        // Delete the audio file after it has been played
+        await fetch(`/api/delete-audio/${data.audio}`, { method: 'DELETE' });
+      };
     } else {
       console.error("Error:", data.error || response.statusText);
       appendMessage("bot", "An error occurred."); // Display error message to the user
@@ -332,7 +437,7 @@ sendButton.addEventListener('click', async () => {
 
 // Speech-to-text (STT) integration using Web Speech API
 micButton.addEventListener('click', () => {
-  const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.lang = 'en-US'; // Set language to English (can be customized)
   recognition.start();
 
@@ -346,16 +451,10 @@ micButton.addEventListener('click', () => {
   };
 });
 
-function speak(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US'; // You can set this to other languages if needed
-  speechSynthesis.speak(utterance);
-}
-
 function appendMessage(sender, text) {
   const messageDiv = document.createElement('div');
   messageDiv.classList.add(sender);
-  messageDiv.innerHTML = formatText(text); // Use innerHTML to apply formatting
+  messageDiv.innerHTML = text; // Use innerHTML to apply formatting
   chatContainer.appendChild(messageDiv);
   chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom
 }
@@ -368,8 +467,68 @@ function formatText(text) {
   // Convert URLs to clickable links
   text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
 
+  // Replace /timetable/ with an iframe
+  text = text.replace(/\/timetable\//g, '<iframe src="https://example.com" width="100%" height="300px" frameborder="0"></iframe>');
+
   return text;
 }
+
+// Function to handle auto-opening links enclosed with # symbols
+function handleAutoOpenLink(text) {
+  const linkMatch = text.match(/#(https?:\/\/[^\s]+)#/);
+  if (linkMatch) {
+    const url = linkMatch[1];
+    window.open(url, '_blank'); // Open the link in a new tab
+  }
+}
+    
+    document.addEventListener('DOMContentLoaded', () => {
+  const userModal = document.getElementById('user-modal');
+  const usernameInput = document.getElementById('username');
+  const emailInput = document.getElementById('email');
+  const submitDetailsButton = document.getElementById('submit-details');
+
+  // Check if user details are already stored
+  const storedUsername = localStorage.getItem('username');
+  const storedEmail = localStorage.getItem('email');
+
+  if (!storedUsername || !storedEmail) {
+    userModal.style.display = 'flex'; // Show modal if details are missing
+  }
+
+  submitDetailsButton.addEventListener('click', async () => {
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+
+    if (username && email) {
+      localStorage.setItem('username', username);
+      localStorage.setItem('email', email);
+
+      // Send welcome email
+      try {
+        const response = await fetch('/api/send-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          alert('welcome to my project');
+          userModal.style.display = 'none'; // Hide modal
+        } else {
+          console.error('Failed to send email:', data.error);
+        }
+      } catch (error) {
+        console.error('Error sending email:', error);
+      }
+    } else {
+      alert('Please fill in both fields.');
+    }
+  });
+});
+    
+    
   </script>
 </body>
 </html>

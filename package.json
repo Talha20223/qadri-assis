@@ -12,6 +12,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "@types/node": "^18.0.6",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "nodemailer": "^6.9.16",
     "playht": "^0.14.0"
